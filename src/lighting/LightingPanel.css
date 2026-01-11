@@ -1,0 +1,428 @@
+/* Lighting Panel Styles */
+
+.lighting-panel {
+    background: rgba(30, 30, 35, 0.95);
+    border-radius: 8px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.lighting-panel.collapsed .panel-content {
+    display: none;
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: background-color 0.2s;
+}
+
+.panel-header:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.panel-header svg {
+    width: 18px;
+    height: 18px;
+    color: #fbbf24;
+}
+
+.panel-header span {
+    flex: 1;
+    font-weight: 500;
+    color: #e5e5e5;
+}
+
+.panel-header .chevron {
+    width: 16px;
+    height: 16px;
+    color: #888;
+    transition: transform 0.2s;
+}
+
+.lighting-panel.collapsed .panel-header .chevron {
+    transform: rotate(-90deg);
+}
+
+.panel-content {
+    padding: 12px;
+}
+
+.panel-section {
+    margin-bottom: 16px;
+}
+
+.panel-section:last-child {
+    margin-bottom: 0;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.section-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #888;
+    margin-bottom: 8px;
+}
+
+.section-header .section-label {
+    margin-bottom: 0;
+}
+
+/* Presets */
+.preset-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+}
+
+.preset-buttons button {
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: #ccc;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.preset-buttons button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+/* Sliders */
+.slider-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.slider-row:last-child {
+    margin-bottom: 0;
+}
+
+.slider-row label {
+    width: 70px;
+    font-size: 12px;
+    color: #aaa;
+}
+
+.slider-row input[type="range"] {
+    flex: 1;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    appearance: none;
+    cursor: pointer;
+}
+
+.slider-row input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    background: #fbbf24;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.slider-row input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+}
+
+.slider-value {
+    width: 40px;
+    text-align: right;
+    font-size: 11px;
+    color: #888;
+    font-family: monospace;
+}
+
+/* Add button */
+.add-button {
+    width: 24px;
+    height: 24px;
+    padding: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.add-button:hover {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.5);
+}
+
+.add-button svg {
+    width: 14px;
+    height: 14px;
+    color: #888;
+}
+
+.add-button:hover svg {
+    color: #3b82f6;
+}
+
+/* Lights list */
+.lights-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.light-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+}
+
+.light-item .light-name {
+    font-size: 12px;
+    color: #ccc;
+    min-width: 60px;
+}
+
+.light-item input[type="range"] {
+    flex: 1;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    appearance: none;
+    cursor: pointer;
+}
+
+.light-item input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    background: #fbbf24;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.visibility-toggle,
+.remove-button {
+    width: 24px;
+    height: 24px;
+    padding: 4px;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.visibility-toggle:hover,
+.remove-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.visibility-toggle svg,
+.remove-button svg {
+    width: 14px;
+    height: 14px;
+    color: #666;
+}
+
+.visibility-toggle.visible svg {
+    color: #3b82f6;
+}
+
+.remove-button:hover svg {
+    color: #ef4444;
+}
+
+.no-lights {
+    text-align: center;
+    padding: 16px;
+    color: #666;
+    font-size: 12px;
+    font-style: italic;
+}
+
+/* Global Illumination Section */
+.gi-section {
+    background: rgba(139, 92, 246, 0.05);
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 8px;
+    border: 1px solid rgba(139, 92, 246, 0.1);
+}
+
+.gi-section .section-header.clickable {
+    cursor: pointer;
+    padding: 4px 0;
+    margin-bottom: 0;
+}
+
+.gi-section .section-header.clickable:hover {
+    opacity: 0.8;
+}
+
+.gi-section .section-label {
+    display: flex;
+    align-items: center;
+    color: #a78bfa;
+    margin-bottom: 0;
+}
+
+.gi-section .chevron {
+    width: 14px;
+    height: 14px;
+    color: #a78bfa;
+    transition: transform 0.2s;
+}
+
+.gi-section .chevron.expanded {
+    transform: rotate(180deg);
+}
+
+.gi-content {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(139, 92, 246, 0.1);
+}
+
+/* Quality Buttons */
+.quality-buttons {
+    display: flex;
+    gap: 4px;
+    flex: 1;
+}
+
+.quality-buttons button {
+    flex: 1;
+    padding: 6px 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    color: #888;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.quality-buttons button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ccc;
+}
+
+.quality-buttons button.active {
+    background: rgba(139, 92, 246, 0.3);
+    border-color: rgba(139, 92, 246, 0.5);
+    color: #a78bfa;
+}
+
+/* GI Subsections */
+.gi-subsection {
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.gi-subsection:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+/* Toggle Row */
+.toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.toggle-row label {
+    font-size: 12px;
+    color: #ccc;
+}
+
+.toggle-button {
+    padding: 4px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: #666;
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 40px;
+}
+
+.toggle-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.toggle-button.active {
+    background: rgba(34, 197, 94, 0.3);
+    border-color: rgba(34, 197, 94, 0.5);
+    color: #22c55e;
+}
+
+/* Indent for sub-sliders */
+.slider-row.indent {
+    padding-left: 8px;
+}
+
+.slider-row.indent label {
+    width: 62px;
+    font-size: 11px;
+    color: #888;
+}
+
+/* Volumetric Presets */
+.volumetric-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 8px;
+    padding-left: 8px;
+}
+
+.volumetric-presets button {
+    padding: 4px 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    color: #888;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.volumetric-presets button:hover {
+    background: rgba(251, 191, 36, 0.2);
+    border-color: rgba(251, 191, 36, 0.4);
+    color: #fbbf24;
+}

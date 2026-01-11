@@ -1,0 +1,309 @@
+/* Sidebar Styles */
+
+.sidebar {
+    background: rgba(25, 25, 30, 0.98);
+    width: 280px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    transition: width 0.2s;
+}
+
+.sidebar.collapsed {
+    width: 48px;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.collapse-button {
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.collapse-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.collapse-button svg {
+    width: 16px;
+    height: 16px;
+    color: #888;
+}
+
+.tab-buttons {
+    display: flex;
+    gap: 4px;
+    margin-left: 8px;
+    flex: 1;
+}
+
+.tab-buttons button {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: #888;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tab-buttons button:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #ccc;
+}
+
+.tab-buttons button.active {
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+}
+
+.tab-buttons button svg {
+    width: 14px;
+    height: 14px;
+}
+
+.sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* Hierarchy View */
+.hierarchy-view {
+    padding: 8px;
+}
+
+.empty-message {
+    text-align: center;
+    padding: 32px 16px;
+    color: #666;
+    font-size: 13px;
+    font-style: italic;
+}
+
+.tree-view {
+    display: flex;
+    flex-direction: column;
+}
+
+.tree-node {
+    display: flex;
+    flex-direction: column;
+}
+
+.tree-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.tree-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.tree-item.selected {
+    background: rgba(59, 130, 246, 0.2);
+}
+
+.expand-button {
+    width: 18px;
+    height: 18px;
+    padding: 2px;
+    background: transparent;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.expand-button svg {
+    width: 12px;
+    height: 12px;
+    color: #666;
+}
+
+.node-icon {
+    width: 16px;
+    height: 16px;
+    color: #fbbf24;
+}
+
+.node-name {
+    flex: 1;
+    font-size: 13px;
+    color: #ccc;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.visibility-button {
+    width: 24px;
+    height: 24px;
+    padding: 4px;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s, background-color 0.2s;
+}
+
+.tree-item:hover .visibility-button {
+    opacity: 1;
+}
+
+.visibility-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.visibility-button svg {
+    width: 14px;
+    height: 14px;
+    color: #666;
+}
+
+.visibility-button.visible svg {
+    color: #3b82f6;
+}
+
+.tree-children {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Layers View */
+.layers-view {
+    padding: 8px;
+}
+
+.layers-header {
+    margin-bottom: 8px;
+}
+
+.add-layer-button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    color: #888;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.add-layer-button:hover {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: #3b82f6;
+}
+
+.add-layer-button svg {
+    width: 14px;
+    height: 14px;
+}
+
+.layers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.layer-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.layer-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.layer-item.active {
+    background: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.layer-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+}
+
+.layer-name {
+    flex: 1;
+    font-size: 13px;
+    color: #ccc;
+}
+
+.layer-visibility,
+.layer-lock {
+    width: 24px;
+    height: 24px;
+    padding: 4px;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.2s, background-color 0.2s;
+}
+
+.layer-item:hover .layer-visibility,
+.layer-item:hover .layer-lock {
+    opacity: 1;
+}
+
+.layer-visibility:hover,
+.layer-lock:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.layer-visibility svg,
+.layer-lock svg {
+    width: 14px;
+    height: 14px;
+    color: #666;
+}
+
+.layer-visibility.visible svg {
+    color: #3b82f6;
+}
+
+.layer-lock.locked svg {
+    color: #f59e0b;
+}

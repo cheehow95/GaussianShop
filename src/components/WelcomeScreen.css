@@ -1,0 +1,332 @@
+/* Welcome Screen Styles */
+
+.welcome-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100%;
+    padding: 2rem;
+    background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+}
+
+.welcome-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 480px;
+}
+
+.welcome-logo {
+    margin-bottom: 1.5rem;
+    animation: logo-float 3s ease-in-out infinite;
+}
+
+@keyframes logo-float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+.welcome-icon {
+    width: 80px;
+    height: 80px;
+}
+
+.welcome-title {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.welcome-subtitle {
+    margin: 0.5rem 0 2rem;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.welcome-actions {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.welcome-button {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.5rem;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.welcome-button svg {
+    width: 20px;
+    height: 20px;
+}
+
+.welcome-button-primary {
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    color: white;
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+}
+
+.welcome-button-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 28px rgba(99, 102, 241, 0.5);
+}
+
+.welcome-shortcut {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.7rem;
+    font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+    margin-left: 0.5rem;
+}
+
+.welcome-drop-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 2rem;
+    border: 2px dashed rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    transition: all 0.2s;
+}
+
+.welcome-drop-zone:hover {
+    border-color: rgba(99, 102, 241, 0.5);
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.welcome-drop-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+}
+
+.welcome-drop-icon svg {
+    width: 24px;
+    height: 24px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.welcome-drop-zone p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.welcome-drop-zone strong {
+    color: rgba(99, 102, 241, 0.9);
+}
+
+.welcome-features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    width: 100%;
+    margin-bottom: 2rem;
+}
+
+.welcome-feature {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.welcome-feature:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.feature-icon {
+    font-size: 1.5rem;
+}
+
+.feature-text {
+    text-align: center;
+}
+
+.feature-text h4 {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.feature-text p {
+    margin: 0.25rem 0 0;
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.welcome-footer {
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 0.8rem;
+}
+
+.welcome-footer kbd {
+    display: inline-block;
+    padding: 0.15rem 0.4rem;
+    font-size: 0.7rem;
+    font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 3px;
+    margin: 0 0.2rem;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .welcome-features {
+        grid-template-columns: 1fr;
+    }
+
+    .welcome-feature {
+        flex-direction: row;
+        text-align: left;
+    }
+
+    .feature-text {
+        text-align: left;
+    }
+}
+
+/* Drag and Drop States */
+.welcome-screen.dragging {
+    background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.2) 0%, transparent 70%);
+}
+
+.welcome-drop-zone.active {
+    border-color: rgba(99, 102, 241, 0.8);
+    background: rgba(99, 102, 241, 0.15);
+    animation: pulse-border 1s infinite;
+}
+
+@keyframes pulse-border {
+
+    0%,
+    100% {
+        border-color: rgba(99, 102, 241, 0.8);
+    }
+
+    50% {
+        border-color: rgba(99, 102, 241, 0.4);
+    }
+}
+
+.welcome-drop-zone.error {
+    border-color: rgba(239, 68, 68, 0.6);
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.welcome-drop-icon.active {
+    background: rgba(99, 102, 241, 0.2);
+    animation: bounce 0.5s ease infinite;
+}
+
+.welcome-drop-icon.active svg {
+    color: rgb(99, 102, 241);
+}
+
+.welcome-drop-icon.error {
+    background: rgba(239, 68, 68, 0.15);
+}
+
+.welcome-drop-icon.error svg {
+    color: rgb(239, 68, 68);
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-4px);
+    }
+}
+
+.drop-active-text {
+    color: rgb(99, 102, 241);
+    font-weight: 500;
+}
+
+.drop-error-text {
+    color: rgb(239, 68, 68);
+    font-size: 0.8rem;
+}
+
+/* Drag Overlay */
+.drag-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 10, 20, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    pointer-events: none;
+}
+
+.drag-overlay-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    color: rgba(99, 102, 241, 0.9);
+}
+
+.drag-overlay-content svg {
+    width: 64px;
+    height: 64px;
+    animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 0.7;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+}
+
+.drag-overlay-content span {
+    font-size: 1.1rem;
+    font-weight: 500;
+}

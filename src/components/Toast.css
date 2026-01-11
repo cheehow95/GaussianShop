@@ -1,0 +1,130 @@
+/* Toast Notification Styles */
+
+.toast-container {
+    position: fixed;
+    bottom: 48px;
+    /* Above status bar */
+    right: 1rem;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 0.5rem;
+    z-index: 2000;
+    pointer-events: none;
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: rgba(20, 20, 35, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    min-width: 280px;
+    max-width: 400px;
+    pointer-events: auto;
+    animation: toast-enter 0.25s ease-out;
+}
+
+.toast-exit {
+    animation: toast-exit 0.2s ease-in forwards;
+}
+
+@keyframes toast-enter {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes toast-exit {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+.toast-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 0.85rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.toast-success .toast-icon {
+    background: rgba(52, 211, 153, 0.2);
+    color: rgb(52, 211, 153);
+}
+
+.toast-error .toast-icon {
+    background: rgba(239, 68, 68, 0.2);
+    color: rgb(239, 68, 68);
+}
+
+.toast-warning .toast-icon {
+    background: rgba(251, 191, 36, 0.2);
+    color: rgb(251, 191, 36);
+}
+
+.toast-info .toast-icon {
+    background: rgba(59, 130, 246, 0.2);
+    color: rgb(59, 130, 246);
+}
+
+.toast-message {
+    flex: 1;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.4;
+}
+
+.toast-close {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 1rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.15s;
+}
+
+.toast-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Border accents by type */
+.toast-success {
+    border-left: 3px solid rgb(52, 211, 153);
+}
+
+.toast-error {
+    border-left: 3px solid rgb(239, 68, 68);
+}
+
+.toast-warning {
+    border-left: 3px solid rgb(251, 191, 36);
+}
+
+.toast-info {
+    border-left: 3px solid rgb(59, 130, 246);
+}
