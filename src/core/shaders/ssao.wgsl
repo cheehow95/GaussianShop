@@ -282,3 +282,114 @@ fn cs_bilateral_blur(@builtin(global_invocation_id) globalId: vec3u) {
     
     textureStore(blurOutput, globalId.xy, vec4f(result, 0.0, 0.0, 0.0));
 }
+
+// ========================================
+// Temporal Accumulation Pass for SSAO
+// ========================================
+
+struct TemporalSSAOUniforms {
+    prevViewProj: mat4x4f,          // Previous frame view-projection matrix
+    currViewProj: mat4x4f,          // Current frame view-projection matrix
+    invCurrViewProj: mat4x4f,       // Inverse current view-projection
+    historyWeight: f32,             // How much to blend history (0.8 - 0.95)
+    viewportWidth: f32,
+    viewportHeight: f32,
+    frameIndex: f32,
+}
+
+@group(2) @binding(0) var<uniform> temporalParams: TemporalSSAOUniforms;
+@group(2) @binding(1) var currentSSAO: texture_2d<f32>;
+@group(2) @binding(2) var historySSAO: texture_2d<f32>;
+@group(2) @binding(3) var velocityTexture: texture_2d<f32>;  // Motion vectors
+@group(2) @binding(4) var temporalOutput: texture_storage_2d<r32float, write>;
+
+// Reconstruct world position from screen UV and depth
+fn reconstructWorldPos(uv: vec2f, depth: f32, invViewProj: mat4x4f) -> vec3f {
+    let ndc = vec4f(uv * 2.0 - 1.0, depth, 1.0);
+    let worldPos = invViewProj * ndc;
+    return worldPos.xyz / worldPos.w;
+}
+
+// Project world position to screen UV
+fn projectToScreen(worldPos: vec3f, viewProj: mat4x4f) -> vec2f {
+    let clipPos = viewProj * vec4f(worldPos, 1.0);
+    var ndc = clipPos.xy / clipPos.w;
+    return ndc * 0.5 + 0.5;
+}
+
+@compute @workgroup_size(8, 8, 1)
+fn cs_ssao_temporal(@builtin(global_invocation_id) globalId: vec3u) {
+    let dims = vec2u(u32(temporalParams.viewportWidth), u32(temporalParams.viewportHeight));
+    
+    if (globalId.x >= dims.x || globalId.y >= dims.y) {
+        return;
+    }
+    
+    let uv = (vec2f(globalId.xy) + 0.5) / vec2f(dims);
+    let currentAO = textureSampleLevel(currentSSAO, linearSampler, uv, 0.0).r;
+    
+    // Get motion vector for temporal reprojection
+    let velocity = textureSampleLevel(velocityTexture, linearSampler, uv, 0.0).xy;
+    let historyUV = uv - velocity;
+    
+    // Reject history if outside screen bounds
+    if (historyUV.x < 0.0 || historyUV.x > 1.0 || historyUV.y < 0.0 || historyUV.y > 1.0) {
+        textureStore(temporalOutput, globalId.xy, vec4f(currentAO, 0.0, 0.0, 0.0));
+        return;
+    }
+    
+    // Sample history AO
+    let historyAO = textureSampleLevel(historySSAO, linearSampler, historyUV, 0.0).r;
+    
+    // Neighborhood clamping for temporal stability
+    var minAO = currentAO;
+    var maxAO = currentAO;
+    let texelSize = 1.0 / vec2f(dims);
+    
+    for (var y = -1; y <= 1; y++) {
+        for (var x = -1; x <= 1; x++) {
+            let neighborUV = uv + vec2f(f32(x), f32(y)) * texelSize;
+            let neighborAO = textureSampleLevel(currentSSAO, linearSampler, neighborUV, 0.0).r;
+            minAO = min(minAO, neighborAO);
+            maxAO = max(maxAO, neighborAO);
+        }
+    }
+    
+    // Extend clamp box slightly for stability
+    let boxExtent = (maxAO - minAO) * 0.1;
+    minAO -= boxExtent;
+    maxAO += boxExtent;
+    
+    // Clamp history to neighborhood
+    let clampedHistory = clamp(historyAO, minAO, maxAO);
+    
+    // Blend current and history with adaptive weight
+    // Reduce weight if history was clamped significantly
+    let clampDistance = abs(historyAO - clampedHistory);
+    let adaptiveWeight = temporalParams.historyWeight * smoothstep(0.2, 0.0, clampDistance);
+    
+    let blendedAO = mix(currentAO, clampedHistory, adaptiveWeight);
+    
+    textureStore(temporalOutput, globalId.xy, vec4f(blendedAO, 0.0, 0.0, 0.0));
+}
+
+// Halton sequence generator for improved sample distribution
+fn halton(index: u32, base: u32) -> f32 {
+    var f = 1.0;
+    var r = 0.0;
+    var i = index;
+    
+    while (i > 0u) {
+        f = f / f32(base);
+        r = r + f * f32(i % base);
+        i = i / base;
+    }
+    
+    return r;
+}
+
+// Get jittered sample position using Halton sequence for better convergence
+fn getHaltonOffset(sampleIndex: u32, frameIndex: u32) -> vec2f {
+    let i = sampleIndex + frameIndex * 64u;
+    return vec2f(halton(i, 2u), halton(i, 3u)) * 2.0 - 1.0;
+}

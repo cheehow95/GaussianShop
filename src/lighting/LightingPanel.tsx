@@ -1,3 +1,4 @@
+
 // Lighting Panel Component
 // UI for controlling lighting settings and global illumination
 
@@ -15,6 +16,12 @@ export function LightingPanel() {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [giExpanded, setGiExpanded] = useState(true);
 
+    // Track which subsections are expanded
+    const [expandedSections, setExpandedSections] = useState({
+        gi: true,
+        lights: true
+    });
+
     useEffect(() => {
         const unsub1 = lightingController.subscribe(setState);
         const unsub2 = globalIllumination.subscribe(setGiSettings);
@@ -22,346 +29,370 @@ export function LightingPanel() {
         return () => { unsub1(); unsub2(); unsub3(); };
     }, []);
 
-    const handleAmbientIntensityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        lightingController.setAmbientIntensity(parseFloat(e.target.value));
+    const handleEnvironmentRotationChange = (rotation: number) => {
+        lightingController.setEnvironmentRotation(rotation);
     };
 
-    const handleEnvironmentRotationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        lightingController.setEnvironmentRotation(parseFloat(e.target.value));
+    const handleEnvironmentIntensityChange = (intensity: number) => {
+        lightingController.setEnvironmentIntensity(intensity);
     };
 
-    const handleEnvironmentIntensityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        lightingController.setEnvironmentIntensity(parseFloat(e.target.value));
+    const handleExposureChange = (exposure: number) => {
+        lightingController.setExposure(exposure);
     };
 
-    const handleExposureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        lightingController.setExposure(parseFloat(e.target.value));
-    };
-
-    const handleSunDirectionChange = (e: React.ChangeEvent<HTMLInputElement>, axis: number) => {
-        const dir = [...state.sunDirection] as [number, number, number];
-        dir[axis] = parseFloat(e.target.value);
+    const updateSunDirection = (dir: [number, number, number]) => {
         lightingController.setSunDirection(dir);
     };
 
-    const handleSunIntensityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        lightingController.setSunIntensity(parseFloat(e.target.value));
+    const updateSunIntensity = (intensity: number) => {
+        lightingController.setSunIntensity(intensity);
     };
 
-    const handleSunColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        // Hex to RGB
-        const hex = e.target.value;
-        const r = parseInt(hex.slice(1, 3), 16) / 255;
-        const g = parseInt(hex.slice(3, 5), 16) / 255;
-        const b = parseInt(hex.slice(5, 7), 16) / 255;
-        lightingController.setSunColor([r, g, b]);
+    const updateSunColor = (color: [number, number, number]) => {
+        lightingController.setSunColor(color);
     };
 
-    // Helper to convert RGB to Hex for color input
-    const getSunColorHex = () => {
-        const r = Math.round(state.sunColor[0] * 255).toString(16).padStart(2, '0');
-        const g = Math.round(state.sunColor[1] * 255).toString(16).padStart(2, '0');
-        const b = Math.round(state.sunColor[2] * 255).toString(16).padStart(2, '0');
-        return `#${r}${g}${b}`;
-    };
-
-    const handlePresetClick = (preset: 'studio' | 'outdoor' | 'sunset' | 'night') => {
+    const applyPreset = (preset: 'studio' | 'outdoor' | 'sunset' | 'night') => {
         lightingController.applyPreset(preset);
         environmentMap.loadPreset(preset);
     };
 
-    const handleAddLight = () => {
-        lightingController.addPointLight();
-    };
-
-    const handleRemoveLight = (id: string) => {
-        lightingController.removePointLight(id);
-    };
-
-    const handleLightIntensityChange = (id: string, value: number) => {
-        lightingController.updatePointLight(id, { intensity: value });
-    };
-
-    const handleLightVisibilityToggle = (id: string) => {
-        const light = lightingController.getPointLight(id);
-        if (light) {
-            lightingController.updatePointLight(id, { visible: !light.visible });
-        }
-    };
-
     // GI handlers
-    const handleGIQualityChange = (quality: GIQuality) => {
+    const updateGIQuality = (quality: GIQuality) => {
         globalIllumination.setQuality(quality);
     };
 
-    const handleSSAOToggle = () => {
-        globalIllumination.setSSAOEnabled(!giSettings.ssao.enabled);
+    const updateSSAOEnabled = (enabled: boolean) => {
+        globalIllumination.setSSAOEnabled(enabled);
     };
 
-    const handleSSAORadiusChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        globalIllumination.setSSAORadius(parseFloat(e.target.value));
+    const updateSSAORadius = (radius: number) => {
+        globalIllumination.setSSAORadius(radius);
     };
 
-    const handleSSAOIntensityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        globalIllumination.setSSAOIntensity(parseFloat(e.target.value));
+    const updateSSAOIntensity = (intensity: number) => {
+        globalIllumination.setSSAOIntensity(intensity);
     };
 
-    const handleSSRToggle = () => {
-        globalIllumination.setSSREnabled(!giSettings.ssr.enabled);
+    const updateSSREnabled = (enabled: boolean) => {
+        globalIllumination.setSSREnabled(enabled);
     };
 
-    const handleVolumetricToggle = () => {
-        volumetricLighting.setEnabled(!volConfig.enabled);
+    const updateVolumetricEnabled = (enabled: boolean) => {
+        volumetricLighting.setEnabled(enabled);
     };
 
-    const handleVolumetricDensityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        volumetricLighting.setDensity(parseFloat(e.target.value));
+    const updateVolumetricDensity = (density: number) => {
+        volumetricLighting.setDensity(density);
     };
 
-    const handleVolumetricScatteringChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        volumetricLighting.setScattering(parseFloat(e.target.value));
+    const updateVolumetricScattering = (scattering: number) => {
+        volumetricLighting.setScattering(scattering);
     };
 
-    const handleVolumetricPreset = (presetName: string) => {
+    const applyVolumetricPreset = (presetName: string) => {
         volumetricLighting.applyPreset(presetName);
     };
 
+    // Helpers
+    const rgbToHex = (rgb: [number, number, number]) => {
+        const r = Math.round(rgb[0] * 255).toString(16).padStart(2, '0');
+        const g = Math.round(rgb[1] * 255).toString(16).padStart(2, '0');
+        const b = Math.round(rgb[2] * 255).toString(16).padStart(2, '0');
+        return `#${r}${g}${b}`;
+    };
+
+    const hexToRgb = (hex: string): [number, number, number] => {
+        const r = parseInt(hex.slice(1, 3), 16) / 255;
+        const g = parseInt(hex.slice(3, 5), 16) / 255;
+        const b = parseInt(hex.slice(5, 7), 16) / 255;
+        return [r, g, b];
+    };
+
+    const PRESETS = [
+        { id: 'studio', label: 'Studio' },
+        { id: 'outdoor', label: 'Outdoor' },
+        { id: 'sunset', label: 'Sunset' },
+        { id: 'night', label: 'Night' }
+    ] as const;
+
+    const activePreset = 'studio'; // Placeholder, add logic to track active preset if needed
+
+    const { environmentRotation, environmentIntensity, exposure, sunDirection, sunIntensity, sunColor } = state;
+
     return (
         <div className={`lighting-panel ${isCollapsed ? 'collapsed' : ''}`}>
-            <div className="panel-header" onClick={() => setIsCollapsed(!isCollapsed)}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="5" />
-                    <line x1="12" y1="1" x2="12" y2="3" />
-                    <line x1="12" y1="21" x2="12" y2="23" />
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                    <line x1="1" y1="12" x2="3" y2="12" />
-                    <line x1="21" y1="12" x2="23" y2="12" />
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-                </svg>
-                <span>Lighting</span>
-                <svg className="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="6 9 12 15 18 9" />
-                </svg>
+
+            <div className="panel-header" onClick={() => setIsCollapsed(!isCollapsed)} style={{ cursor: 'pointer' }}>
+                <div className="panel-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 18, height: 18 }}>
+                        <circle cx="12" cy="12" r="5" />
+                        <line x1="12" y1="1" x2="12" y2="3" />
+                        <line x1="12" y1="21" x2="12" y2="23" />
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                        <line x1="1" y1="12" x2="3" y2="12" />
+                        <line x1="21" y1="12" x2="23" y2="12" />
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                    </svg>
+                    <span>Lighting</span>
+                </div>
+                <div style={{ transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</div>
             </div>
 
             {!isCollapsed && (
                 <div className="panel-content">
                     {/* Presets */}
-                    <div className="panel-section">
-                        <div className="section-label">Presets</div>
-                        <div className="preset-buttons">
-                            <button onClick={() => handlePresetClick('studio')}>Studio</button>
-                            <button onClick={() => handlePresetClick('outdoor')}>Outdoor</button>
-                            <button onClick={() => handlePresetClick('sunset')}>Sunset</button>
-                            <button onClick={() => handlePresetClick('night')}>Night</button>
+                    <div className="control-group">
+                        <div className="control-group-title">Presets</div>
+                        <div className="presets-container">
+                            {PRESETS.map(preset => (
+                                <button
+                                    key={preset.id}
+                                    className={`preset-btn`}
+                                    onClick={() => applyPreset(preset.id)}
+                                >
+                                    {preset.label}
+                                </button>
+                            ))}
                         </div>
                     </div>
 
                     {/* Environment */}
-                    <div className="panel-section">
-                        <div className="section-label">Environment</div>
-                        <div className="slider-row">
-                            <label>Rotation</label>
+                    <div className="control-group">
+                        <div className="control-group-title">Environment</div>
+
+                        <div className="slider-container">
+                            <span className="slider-label">Rotation</span>
                             <input
                                 type="range"
                                 min="0"
                                 max="360"
-                                step="1"
-                                value={state.environmentRotation}
-                                onChange={handleEnvironmentRotationChange}
+                                value={environmentRotation}
+                                onChange={(e) => handleEnvironmentRotationChange(parseFloat(e.target.value))}
                             />
-                            <span className="slider-value">{state.environmentRotation.toFixed(0)}°</span>
+                            <span className="value-display">{Math.round(environmentRotation)}°</span>
                         </div>
-                        <div className="slider-row">
-                            <label>Intensity</label>
+
+                        <div className="slider-container">
+                            <span className="slider-label">Intensity</span>
                             <input
                                 type="range"
                                 min="0"
-                                max="3"
+                                max="5"
                                 step="0.1"
-                                value={state.environmentIntensity}
-                                onChange={handleEnvironmentIntensityChange}
+                                value={environmentIntensity}
+                                onChange={(e) => handleEnvironmentIntensityChange(parseFloat(e.target.value))}
                             />
-                            <span className="slider-value">{state.environmentIntensity.toFixed(1)}</span>
+                            <span className="value-display">{environmentIntensity.toFixed(1)}</span>
                         </div>
                     </div>
 
                     {/* Exposure */}
-                    <div className="panel-section">
-                        <div className="section-label">Exposure</div>
-                        <div className="slider-row">
-                            <label>Level</label>
+                    <div className="control-group">
+                        <div className="control-group-title">Exposure</div>
+                        <div className="slider-container">
+                            <span className="slider-label">Level</span>
                             <input
                                 type="range"
-                                min="0.1"
-                                max="3"
+                                min="0"
+                                max="5"
                                 step="0.1"
-                                value={state.exposure}
-                                onChange={handleExposureChange}
+                                value={exposure}
+                                onChange={(e) => handleExposureChange(parseFloat(e.target.value))}
                             />
-                            <span className="slider-value">{state.exposure.toFixed(1)}</span>
+                            <span className="value-display">{exposure.toFixed(1)}</span>
                         </div>
                     </div>
 
                     {/* Sun Light */}
-                    <div className="panel-section">
-                        <div className="section-label">Sun Light</div>
-                        <div className="slider-row">
-                            <label>Direction X</label>
-                            <input type="range" min="-1" max="1" step="0.1" value={state.sunDirection[0]} onChange={(e) => handleSunDirectionChange(e, 0)} />
+                    <div className="control-group">
+                        <div className="control-group-title">Sun Light</div>
+
+                        {['X', 'Y', 'Z'].map((axis, i) => (
+                            <div className="slider-container" key={axis}>
+                                <span className="slider-label">Dir {axis}</span>
+                                <input
+                                    type="range"
+                                    min="-1"
+                                    max="1"
+                                    step="0.01"
+                                    value={sunDirection[i]}
+                                    onChange={(e) => {
+                                        const newDir = [...sunDirection] as [number, number, number];
+                                        newDir[i] = parseFloat(e.target.value);
+                                        updateSunDirection(newDir);
+                                    }}
+                                />
+                            </div>
+                        ))}
+
+                        <div className="slider-container">
+                            <span className="slider-label">Intensity</span>
+                            <input
+                                type="range"
+                                min="0"
+                                max="10"
+                                step="0.1"
+                                value={sunIntensity}
+                                onChange={(e) => updateSunIntensity(parseFloat(e.target.value))}
+                            />
+                            <span className="value-display">{sunIntensity.toFixed(1)}</span>
                         </div>
-                        <div className="slider-row">
-                            <label>Direction Y</label>
-                            <input type="range" min="-1" max="1" step="0.1" value={state.sunDirection[1]} onChange={(e) => handleSunDirectionChange(e, 1)} />
-                        </div>
-                        <div className="slider-row">
-                            <label>Direction Z</label>
-                            <input type="range" min="-1" max="1" step="0.1" value={state.sunDirection[2]} onChange={(e) => handleSunDirectionChange(e, 2)} />
-                        </div>
-                        <div className="slider-row">
-                            <label>Intensity</label>
-                            <input type="range" min="0" max="5" step="0.1" value={state.sunIntensity} onChange={handleSunIntensityChange} />
-                            <span className="slider-value">{state.sunIntensity.toFixed(1)}</span>
-                        </div>
-                        <div className="slider-row">
-                            <label>Color</label>
-                            <input type="color" value={getSunColorHex()} onChange={handleSunColorChange} />
+
+                        <div className="slider-container">
+                            <span className="slider-label">Color</span>
+                            <input
+                                type="color"
+                                value={rgbToHex(sunColor)}
+                                onChange={(e) => updateSunColor(hexToRgb(e.target.value))}
+                            />
                         </div>
                     </div>
 
-                    {/* Global Illumination */}
-                    <div className="panel-section gi-section">
-                        <div className="section-header clickable" onClick={() => setGiExpanded(!giExpanded)}>
-                            <div className="section-label">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 16, height: 16, marginRight: 6 }}>
-                                    <circle cx="12" cy="12" r="10" opacity="0.3" />
-                                    <circle cx="12" cy="12" r="6" opacity="0.5" />
-                                    <circle cx="12" cy="12" r="2" />
-                                </svg>
-                                Global Illumination
-                            </div>
-                            <svg className={`chevron ${giExpanded ? 'expanded' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <polyline points="6 9 12 15 18 9" />
-                            </svg>
+                    {/* Global Illumination Section */}
+                    <div className="nested-section">
+                        <div
+                            className="nested-header"
+                            onClick={() => setGiExpanded(!giExpanded)}
+                        >
+                            <div className="control-group-title" style={{ marginBottom: 0 }}>Global Illumination</div>
+                            <span className={`arrow-icon ${giExpanded ? 'open' : ''}`}>▼</span>
                         </div>
 
                         {giExpanded && (
-                            <div className="gi-content">
-                                {/* Quality Preset */}
-                                <div className="slider-row">
-                                    <label>Quality</label>
-                                    <div className="quality-buttons">
-                                        {(['low', 'medium', 'high', 'ultra'] as GIQuality[]).map(q => (
-                                            <button
-                                                key={q}
-                                                className={giSettings.quality === q ? 'active' : ''}
-                                                onClick={() => handleGIQualityChange(q)}
-                                            >
-                                                {q.charAt(0).toUpperCase() + q.slice(1)}
-                                            </button>
-                                        ))}
+                            <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                <div className="control-group">
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                        <span className="slider-label">Quality</span>
+                                        <div style={{ display: 'flex', gap: '4px' }}>
+                                            {(['low', 'medium', 'high', 'ultra'] as GIQuality[]).map(q => (
+                                                <button
+                                                    key={q}
+                                                    style={{
+                                                        padding: '4px 8px',
+                                                        fontSize: '0.7rem',
+                                                        background: giSettings.quality === q ? 'var(--accent-primary)' : 'rgba(255,255,255,0.05)',
+                                                        color: giSettings.quality === q ? 'white' : 'var(--text-secondary)',
+                                                        border: giSettings.quality === q ? 'none' : '1px solid rgba(255,255,255,0.1)'
+                                                    }}
+                                                    onClick={() => updateGIQuality(q)}
+                                                >
+                                                    {q.charAt(0).toUpperCase() + q.slice(1)}
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
 
                                 {/* SSAO */}
-                                <div className="gi-subsection">
-                                    <div className="toggle-row">
-                                        <label>Ambient Occlusion (SSAO)</label>
-                                        <button
-                                            className={`toggle-button ${giSettings.ssao.enabled ? 'active' : ''}`}
-                                            onClick={handleSSAOToggle}
-                                        >
-                                            {giSettings.ssao.enabled ? 'ON' : 'OFF'}
-                                        </button>
+                                <div className="control-group">
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span className="slider-label">Ambient Occlusion</span>
+                                        <label className="toggle-switch">
+                                            <input
+                                                type="checkbox"
+                                                checked={giSettings.ssao.enabled}
+                                                onChange={(e) => updateSSAOEnabled(e.target.checked)}
+                                            />
+                                            <span className="slider-round"></span>
+                                        </label>
                                     </div>
+
                                     {giSettings.ssao.enabled && (
                                         <>
-                                            <div className="slider-row indent">
-                                                <label>Radius</label>
+                                            <div className="slider-container">
+                                                <span className="slider-label" style={{ fontSize: '0.8em', marginLeft: '8px' }}>Radius</span>
                                                 <input
                                                     type="range"
                                                     min="0.1"
-                                                    max="2"
+                                                    max="2.0"
                                                     step="0.1"
                                                     value={giSettings.ssao.radius}
-                                                    onChange={handleSSAORadiusChange}
+                                                    onChange={(e) => updateSSAORadius(parseFloat(e.target.value))}
                                                 />
-                                                <span className="slider-value">{giSettings.ssao.radius.toFixed(1)}</span>
+                                                <span className="value-display">{giSettings.ssao.radius.toFixed(1)}</span>
                                             </div>
-                                            <div className="slider-row indent">
-                                                <label>Intensity</label>
+                                            <div className="slider-container">
+                                                <span className="slider-label" style={{ fontSize: '0.8em', marginLeft: '8px' }}>Intensity</span>
                                                 <input
                                                     type="range"
                                                     min="0"
-                                                    max="3"
+                                                    max="3.0"
                                                     step="0.1"
                                                     value={giSettings.ssao.intensity}
-                                                    onChange={handleSSAOIntensityChange}
+                                                    onChange={(e) => updateSSAOIntensity(parseFloat(e.target.value))}
                                                 />
-                                                <span className="slider-value">{giSettings.ssao.intensity.toFixed(1)}</span>
+                                                <span className="value-display">{giSettings.ssao.intensity.toFixed(1)}</span>
                                             </div>
                                         </>
                                     )}
                                 </div>
 
                                 {/* SSR */}
-                                <div className="gi-subsection">
-                                    <div className="toggle-row">
-                                        <label>Screen-Space Reflections</label>
-                                        <button
-                                            className={`toggle-button ${giSettings.ssr.enabled ? 'active' : ''}`}
-                                            onClick={handleSSRToggle}
-                                        >
-                                            {giSettings.ssr.enabled ? 'ON' : 'OFF'}
-                                        </button>
+                                <div className="control-group">
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span className="slider-label">Screen Reflections</span>
+                                        <label className="toggle-switch">
+                                            <input
+                                                type="checkbox"
+                                                checked={giSettings.ssr.enabled}
+                                                onChange={(e) => updateSSREnabled(e.target.checked)}
+                                            />
+                                            <span className="slider-round"></span>
+                                        </label>
                                     </div>
                                 </div>
 
                                 {/* Volumetric */}
-                                <div className="gi-subsection">
-                                    <div className="toggle-row">
-                                        <label>Volumetric Lighting</label>
-                                        <button
-                                            className={`toggle-button ${volConfig.enabled ? 'active' : ''}`}
-                                            onClick={handleVolumetricToggle}
-                                        >
-                                            {volConfig.enabled ? 'ON' : 'OFF'}
-                                        </button>
+                                <div className="control-group">
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span className="slider-label">Volumetric Fog</span>
+                                        <label className="toggle-switch">
+                                            <input
+                                                type="checkbox"
+                                                checked={volConfig.enabled}
+                                                onChange={(e) => updateVolumetricEnabled(e.target.checked)}
+                                            />
+                                            <span className="slider-round"></span>
+                                        </label>
                                     </div>
+
                                     {volConfig.enabled && (
                                         <>
-                                            <div className="slider-row indent">
-                                                <label>Density</label>
+                                            <div className="slider-container">
+                                                <span className="slider-label" style={{ fontSize: '0.8em', marginLeft: '8px' }}>Density</span>
                                                 <input
                                                     type="range"
                                                     min="0"
-                                                    max="0.2"
-                                                    step="0.005"
+                                                    max="0.1"
+                                                    step="0.001"
                                                     value={volConfig.density}
-                                                    onChange={handleVolumetricDensityChange}
+                                                    onChange={(e) => updateVolumetricDensity(parseFloat(e.target.value))}
                                                 />
-                                                <span className="slider-value">{volConfig.density.toFixed(3)}</span>
+                                                <span className="value-display">{volConfig.density.toFixed(3)}</span>
                                             </div>
-                                            <div className="slider-row indent">
-                                                <label>Scattering</label>
+                                            <div className="slider-container">
+                                                <span className="slider-label" style={{ fontSize: '0.8em', marginLeft: '8px' }}>Scattering</span>
                                                 <input
                                                     type="range"
                                                     min="0"
-                                                    max="2"
+                                                    max="2.0"
                                                     step="0.1"
                                                     value={volConfig.scattering}
-                                                    onChange={handleVolumetricScatteringChange}
+                                                    onChange={(e) => updateVolumetricScattering(parseFloat(e.target.value))}
                                                 />
-                                                <span className="slider-value">{volConfig.scattering.toFixed(1)}</span>
+                                                <span className="value-display">{volConfig.scattering.toFixed(1)}</span>
                                             </div>
-                                            <div className="volumetric-presets">
-                                                {VOLUMETRIC_PRESETS.slice(1, 5).map(preset => (
+                                            <div className="presets-container" style={{ marginTop: '8px' }}>
+                                                {VOLUMETRIC_PRESETS.map(preset => (
                                                     <button
                                                         key={preset.name}
-                                                        onClick={() => handleVolumetricPreset(preset.name)}
-                                                        title={preset.name}
+                                                        className="preset-btn"
+                                                        style={{ fontSize: '0.7rem', padding: '4px' }}
+                                                        onClick={() => applyVolumetricPreset(preset.name)}
                                                     >
                                                         {preset.name}
                                                     </button>
@@ -373,61 +404,6 @@ export function LightingPanel() {
                             </div>
                         )}
                     </div>
-
-                    {/* Point Lights */}
-                    <div className="panel-section">
-                        <div className="section-header">
-                            <div className="section-label">Point Lights</div>
-                            <button className="add-button" onClick={handleAddLight}>
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <line x1="12" y1="5" x2="12" y2="19" />
-                                    <line x1="5" y1="12" x2="19" y2="12" />
-                                </svg>
-                            </button>
-                        </div>
-                        <div className="lights-list">
-                            {state.pointLights.map((light, index) => (
-                                <div key={light.id} className="light-item">
-                                    <button
-                                        className={`visibility-toggle ${light.visible ? 'visible' : ''}`}
-                                        onClick={() => handleLightVisibilityToggle(light.id)}
-                                    >
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            {light.visible ? (
-                                                <>
-                                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                                    <circle cx="12" cy="12" r="3" />
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                                                    <line x1="1" y1="1" x2="23" y2="23" />
-                                                </>
-                                            )}
-                                        </svg>
-                                    </button>
-                                    <span className="light-name">Light {index + 1}</span>
-                                    <input
-                                        type="range"
-                                        min="0"
-                                        max="5"
-                                        step="0.1"
-                                        value={light.intensity}
-                                        onChange={(e) => handleLightIntensityChange(light.id, parseFloat(e.target.value))}
-                                    />
-                                    <button className="remove-button" onClick={() => handleRemoveLight(light.id)}>
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <line x1="18" y1="6" x2="6" y2="18" />
-                                            <line x1="6" y1="6" x2="18" y2="18" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            ))}
-                            {state.pointLights.length === 0 && (
-                                <div className="no-lights">No point lights</div>
-                            )}
-                        </div>
-                    </div>
                 </div>
             )}
         </div>
@@ -435,4 +411,3 @@ export function LightingPanel() {
 }
 
 export default LightingPanel;
-

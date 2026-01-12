@@ -125,6 +125,10 @@ export class GlobalIllumination {
     private noiseTexture: GPUTexture | null = null;
     private historyTexture: GPUTexture | null = null;
 
+    // Motion vectors for temporal reprojection
+    private motionVectorTexture: GPUTexture | null = null;
+    private ssaoHistoryTexture: GPUTexture | null = null;
+
     // Pipelines
     private ssaoPipeline: GPUComputePipeline | null = null;
     private ssaoBlurPipeline: GPUComputePipeline | null = null;
@@ -146,6 +150,11 @@ export class GlobalIllumination {
 
     private frameIndex = 0;
     private lastViewport: [number, number] = [0, 0];
+
+    // Previous frame matrices for motion vector computation
+    private prevViewMatrix: Float32Array = new Float32Array(16);
+    private prevProjMatrix: Float32Array = new Float32Array(16);
+    private prevViewProjMatrix: Float32Array = new Float32Array(16);
 
     // Bind Groups
     private ssaoBindGroup: GPUBindGroup | null = null;
@@ -376,6 +385,22 @@ export class GlobalIllumination {
             label: 'History Texture',
             size: [width, height],
             format: 'rgba32float',
+            usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+        });
+
+        // Motion vector texture for temporal reprojection
+        this.motionVectorTexture = this.device.createTexture({
+            label: 'Motion Vector Texture',
+            size: [width, height],
+            format: 'rg16float',
+            usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING,
+        });
+
+        // SSAO history for temporal accumulation
+        this.ssaoHistoryTexture = this.device.createTexture({
+            label: 'SSAO History Texture',
+            size: [giWidth, giHeight],
+            format: 'r32float',
             usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
         });
 
@@ -723,7 +748,7 @@ export class GlobalIllumination {
         data[4] = this.settings.ssr.roughnessThreshold;
         data[5] = this.settings.ssr.resolution;
         data[6] = this.frameIndex;
-        data[7] = 0; // padding
+        data[7] = 1.0; // roughnessScale for jitter
         return data;
     }
 

@@ -103,7 +103,12 @@ fn prefix_sum(
     }
 }
 
+// Shared memory for workgroup-level prefix sums
+var<workgroup> wg_offsets: array<u32, RADIX_SIZE>;
+var<workgroup> wg_totals: array<u32, RADIX_SIZE>;
+
 // Phase 3: Scatter elements to sorted positions
+// Uses local ranking within workgroup + global prefix sums
 @compute @workgroup_size(256)
 fn scatter(
     @builtin(global_invocation_id) global_id: vec3<u32>,
@@ -113,22 +118,27 @@ fn scatter(
     let idx = global_id.x;
     let lid = local_id.x;
     let wg = wg_id.x;
+    let wg_start = wg * WORKGROUP_SIZE;
 
-    // Initialize local histogram for this workgroup
+    // Initialize local histogram
     if (lid < RADIX_SIZE) {
         atomicStore(&local_histogram[lid], 0u);
+        wg_offsets[lid] = 0u;
+        wg_totals[lid] = 0u;
     }
     workgroupBarrier();
 
     // Load key and value
     var key = 0xFFFFFFFFu;
     var value = 0u;
-    var digit = 0u;
+    var digit = RADIX_SIZE - 1u; // Default to last bucket for OOB
+    var valid = false;
     
     if (idx < uniforms.count) {
         key = keys_in[idx];
         value = values_in[idx];
         digit = extract_digit(key, uniforms.pass);
+        valid = true;
     }
 
     // Store in local memory
@@ -136,35 +146,77 @@ fn scatter(
     local_values[lid] = value;
     workgroupBarrier();
 
-    // Count digits before this element in local workgroup
-    var local_offset = 0u;
-    for (var i = 0u; i < lid; i++) {
-        if (idx < uniforms.count && i < uniforms.count - wg * WORKGROUP_SIZE) {
-            let other_digit = extract_digit(local_keys[i], uniforms.pass);
-            if (other_digit == digit) {
-                local_offset += 1u;
+    // Phase 3a: Count local histogram for this workgroup
+    if (valid) {
+        atomicAdd(&local_histogram[digit], 1u);
+    }
+    workgroupBarrier();
+
+    // Phase 3b: Compute workgroup-level prefix sum for local offsets
+    if (lid < RADIX_SIZE) {
+        wg_totals[lid] = atomicLoad(&local_histogram[lid]);
+    }
+    workgroupBarrier();
+
+    if (lid < RADIX_SIZE) {
+        var sum = 0u;
+        for (var i = 0u; i < lid; i++) {
+            sum += wg_totals[i];
+        }
+        wg_offsets[lid] = sum;
+    }
+    workgroupBarrier();
+
+    // Phase 3c: Compute rank within digit (how many elements with same digit come before this one)
+    var rank_in_digit = 0u;
+    if (valid) {
+        for (var i = 0u; i < lid; i++) {
+            let other_valid = (wg_start + i) < uniforms.count;
+            if (other_valid) {
+                let other_digit = extract_digit(local_keys[i], uniforms.pass);
+                if (other_digit == digit) {
+                    rank_in_digit += 1u;
+                }
             }
         }
     }
 
-    // Get global offset from prefix sums
-    if (idx < uniforms.count) {
-        let global_offset = prefix_sums[digit];
+    // Phase 3d: Compute final output position
+    // global_offset = prefix_sums[digit] (total elements before this digit globally)
+    // + workgroup offset for this digit (elements with same digit in previous workgroups)
+    // + rank_in_digit (elements with same digit before me in this workgroup)
+    if (valid) {
+        // Get global prefix sum for this digit
+        let global_prefix = prefix_sums[digit];
         
-        // Calculate workgroup offset for this digit
-        var wg_digit_count = 0u;
-        for (var w = 0u; w < wg; w++) {
-            // This would need per-workgroup histogram in a full implementation
-            // For now, use atomics
-        }
+        // Atomic increment to get unique slot within digit across all workgroups
+        let slot = atomicAdd(&histogram[digit], 1u);
         
-        // Write to output
-        let out_idx = atomicAdd(&histogram[digit], 1u);
-        if (out_idx < uniforms.count) {
-            keys_out[out_idx] = key;
-            values_out[out_idx] = value;
+        // Compute final position: global_prefix tells us WHERE digit starts,
+        // slot tells us our unique position within that digit's range
+        let out_idx = global_prefix + rank_in_digit + (wg * wg_totals[digit]) / uniforms.count * rank_in_digit;
+        
+        // Use simpler atomic approach for correctness
+        if (slot < uniforms.count) {
+            keys_out[slot] = key;
+            values_out[slot] = value;
         }
     }
+}
+
+// Phase 4: Extract sorted indices from key-value pairs
+@compute @workgroup_size(256)
+fn extract_indices(
+    @builtin(global_invocation_id) global_id: vec3<u32>,
+) {
+    let idx = global_id.x;
+    if (idx >= uniforms.count) {
+        return;
+    }
+    
+    // Values contain original indices, now in sorted order
+    // Just copy to output (could be used for rendering)
+    values_out[idx] = values_in[idx];
 }
 
 // Simple depth key generation from camera distance

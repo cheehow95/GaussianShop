@@ -9,7 +9,7 @@ struct SSRUniforms {
     roughnessThreshold: f32,
     resolution: f32,        // Resolution multiplier
     frameIndex: f32,
-    _pad: f32,
+    roughnessScale: f32,    // Scale factor for roughness-based jitter
 }
 
 struct CameraUniforms {
@@ -30,10 +30,19 @@ struct CameraUniforms {
 @group(0) @binding(4) var linearSampler: sampler;
 @group(0) @binding(5) var outputTexture: texture_storage_2d<rgba32float, write>;
 @group(0) @binding(6) var environmentMap: texture_2d<f32>;
+// Hi-Z mip chain for accelerated ray marching
+@group(0) @binding(7) var hizTexture: texture_2d<f32>;
 
 // Constants
 const INV_PI = 0.31830988618;
 const INV_2PI = 0.15915494309;
+
+// Blue noise for temporal jitter
+fn blueNoise(uv: vec2f, frame: f32) -> vec2f {
+    let n = fract(sin(dot(uv + frame * 0.1, vec2f(12.9898, 78.233))) * 43758.5453);
+    let m = fract(sin(dot(uv + frame * 0.1 + 0.5, vec2f(4.1414, 28.134))) * 23421.631);
+    return vec2f(n, m) * 2.0 - 1.0;
+}
 
 // Equirectangular mapping for IBL
 fn sampleEnvironment(direction: vec3f) -> vec3f {
